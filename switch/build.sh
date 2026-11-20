@@ -25,7 +25,17 @@ fi
 rm -rf "$APP/romfs"
 npm run build
 mkdir -p "$APP/romfs"
-cp -R "$SRC/romfs/." "$APP/romfs/"
+# Copy the static RomFS sources (e.g. nxjs.ini) but never the local build
+# output, which would shadow the files esbuild just generated.
+if [ -d "$SRC/romfs" ]; then
+  for f in "$SRC"/romfs/*; do
+    [ -e "$f" ] || continue
+    case "$(basename "$f")" in
+      main.js|main.js.map) continue ;;
+    esac
+    cp -R "$f" "$APP/romfs/"
+  done
+fi
 npm run nro
 
 cp "$APP/tank-wars.nro" "$SRC/tank-wars.nro"

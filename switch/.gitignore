@@ -1,3 +1,4 @@
 node_modules/
-romfs/
+romfs/main.js
+romfs/main.js.map
 tank-wars.nro
