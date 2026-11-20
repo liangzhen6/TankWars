@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0d0b">
+  <meta name="description" content="TANK WARS：三关 8-bit 风格坦克大战，包含原创技能系统、像素美术与合成音效。">
+  <title>TANK WARS · 坦克大战 三关试玩</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='5' fill='%23101512'/%3E%3Cg fill='%23e8b53c'%3E%3Crect x='5' y='8' width='5' height='16'/%3E%3Crect x='22' y='8' width='5' height='16'/%3E%3Crect x='10' y='12' width='12' height='12'/%3E%3Crect x='14' y='3' width='4' height='12'/%3E%3C/g%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page">
+    <div class="console-shell">
+      <div class="console" id="console">
+        <aside class="rail left-rail" aria-label="任务与状态">
+          <div class="rail-brand">
+            <svg class="brand-tank" viewBox="0 0 48 48" aria-hidden="true">
+              <rect x="7" y="12" width="7" height="26" fill="currentColor"/>
+              <rect x="34" y="12" width="7" height="26" fill="currentColor"/>
+              <rect x="15" y="18" width="18" height="18" fill="currentColor"/>
+              <rect x="21" y="4" width="6" height="18" fill="currentColor"/>
+              <rect x="15" y="29" width="18" height="3" fill="#0d110e" opacity=".55"/>
+              <rect x="10" y="17" width="2" height="2" fill="#0d110e" opacity=".55"/>
+              <rect x="10" y="25" width="2" height="2" fill="#0d110e" opacity=".55"/>
+              <rect x="36" y="17" width="2" height="2" fill="#0d110e" opacity=".55"/>
+              <rect x="36" y="25" width="2" height="2" fill="#0d110e" opacity=".55"/>
+            </svg>
+            <div>
+              <p class="rail-kicker">8-BIT TRIBUTE</p>
+              <h1>TANK <span>WARS</span></h1>
+              <p class="rail-sub" id="rail-stage-label">STAGE 01 / 三关试玩</p>
+            </div>
+          </div>
+
+          <div class="rail-mission">
+            <span class="status-dot"></span>
+            <span id="mission-text">守住基地 · 击毁或策反</span>
+            <strong id="mission-enemy">12</strong>
+            <span id="mission-unit">台敌军</span>
+          </div>
+
+          <div class="rail-stats">
+            <div class="rail-scores">
+              <div class="rail-score p1-score">
+                <span class="rail-label">P1 SCORE</span>
+                <strong id="stat-score-p1">000000</strong>
+              </div>
+              <div class="rail-score p2-score" id="p2-score-block">
+                <span class="rail-label">P2 SCORE</span>
+                <strong id="stat-score-p2">000000</strong>
+              </div>
+            </div>
+
+            <div class="rail-enemies">
+              <div class="rail-label-row">
+                <span class="rail-label">ENEMY</span>
+                <strong id="stat-enemy">12</strong>
+              </div>
+              <div class="enemy-pips" id="enemy-pips" aria-hidden="true"></div>
+            </div>
+
+            <div class="rail-players">
+              <div class="player-row">
+                <span class="player-badge p1">P1</span>
+                <div class="rail-mini-grid">
+                  <div>
+                    <span class="rail-label">LIVES</span>
+                    <div class="mini-pips" id="lives-pips-p1" aria-hidden="true"></div>
+                  </div>
+                  <div>
+                    <span class="rail-label">GUN</span>
+                    <div class="mini-pips gun" id="gun-pips-p1" aria-hidden="true"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="player-row p2-row" id="p2-player-row">
+                <span class="player-badge p2">P2</span>
+                <div class="rail-mini-grid">
+                  <div>
+                    <span class="rail-label">LIVES</span>
+                    <div class="mini-pips" id="lives-pips-p2" aria-hidden="true"></div>
+                  </div>
+                  <div>
+                    <span class="rail-label">GUN</span>
+                    <div class="mini-pips gun" id="gun-pips-p2" aria-hidden="true"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="rail-data-row"><span>STAGE</span><strong id="stat-stage">01</strong></div>
+            <div class="rail-data-row"><span>BASE</span><strong id="stat-base">ONLINE</strong></div>
+            <div class="rail-data-row"><span>LOCAL BEST</span><strong id="high-score">000000</strong></div>
+          </div>
+
+          <div class="rail-actions">
+            <button class="chip-btn" id="btn-sound" type="button" title="关闭音效（M）">MUTE</button>
+            <button class="chip-btn" id="btn-pause" type="button" title="暂停 / 继续（P）">PAUSE</button>
+            <button class="chip-btn accent" id="btn-restart" type="button" title="重新开始（R）">RESTART</button>
+          </div>
+
+          <div class="rail-footnote">
+            <span>P1 WASD + SPACE · P2 方向键 + ENTER</span>
+            <span>P1 Q/E/F · P2 7/8/9</span>
+            <span>P 暂停 · M 静音 · R 重开</span>
+          </div>
+        </aside>
+
+        <div class="field-col">
+          <div class="screen" id="screen">
+            <canvas id="game" width="832" height="832" aria-label="坦克大战游戏画面" tabindex="0"></canvas>
+            <div class="scanlines" aria-hidden="true"></div>
+            <div class="glass" aria-hidden="true"></div>
+          </div>
+        </div>
+
+        <aside class="rail right-rail" aria-label="特殊技能">
+          <div class="rail-head">
+            <span>SPECIAL ABILITIES</span>
+            <span>P1 / P2</span>
+          </div>
+
+          <div class="ability-deck">
+            <div class="deck-label"><span class="player-badge p1">P1</span><span>Q / E / F</span></div>
+            <div class="ability-bar">
+              <button class="ability-btn" data-player="0" data-skill="magnet" type="button" title="磁力场：吸收敌方炮弹，并牵引周围的金属坦克">
+                <span class="ability-key">Q</span>
+                <span class="ability-art" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M5 3v9a7 7 0 0 0 14 0V3h-5v9a2 2 0 0 1-4 0V3H5Z" fill="currentColor"/>
+                    <rect x="5" y="3" width="5" height="3" fill="#0d110e"/>
+                    <rect x="14" y="3" width="5" height="3" fill="#0d110e"/>
+                  </svg>
+                </span>
+                <span class="ability-copy">
+                  <strong>磁力场</strong>
+                  <small>吸弹 · 牵引</small>
+                </span>
+                <span class="ability-timer" data-skill-timer>READY</span>
+              </button>
+
+              <button class="ability-btn" data-player="0" data-skill="mind" type="button" title="心念支配：选择一名敌军，把它变成自主作战的友军">
+                <span class="ability-key">E</span>
+                <span class="ability-art" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M9 3a6 6 0 0 0-4 10.5V19h4v-3h3v3h4v-5.2A6 6 0 0 0 9 3Z" fill="currentColor"/>
+                    <path d="M17 6c1.6 1.1 2.5 2.9 2.5 4.8M19.5 3.5C22 5.2 23 8 23 10.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                  </svg>
+                </span>
+                <span class="ability-copy">
+                  <strong>心念支配</strong>
+                  <small>选目标 · 策反</small>
+                </span>
+                <span class="ability-timer" data-skill-timer>READY</span>
+              </button>
+
+              <button class="ability-btn" data-player="0" data-skill="teleport" type="button" title="瞬移：进入慢动作瞄准，选择落点后穿越障碍跃迁">
+                <span class="ability-key">F</span>
+                <span class="ability-art" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12 2 16 7 12 12 8 7 12 2Z" fill="currentColor"/>
+                    <path d="M12 12 16 17 12 22 8 17 12 12Z" fill="currentColor" opacity=".45"/>
+                  </svg>
+                </span>
+                <span class="ability-copy">
+                  <strong>瞬移</strong>
+                  <small>选落点 · 无敌</small>
+                </span>
+                <span class="ability-timer" data-skill-timer>READY</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="ability-deck p2-deck" id="p2-ability-deck">
+            <div class="deck-label"><span class="player-badge p2">P2</span><span>7 / 8 / 9</span></div>
+            <div class="ability-bar">
+              <button class="ability-btn" data-player="1" data-skill="magnet" type="button" title="磁力场：吸收敌方炮弹，并牵引周围的金属坦克">
+                <span class="ability-key">7</span>
+                <span class="ability-art" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M5 3v9a7 7 0 0 0 14 0V3h-5v9a2 2 0 0 1-4 0V3H5Z" fill="currentColor"/>
+                    <rect x="5" y="3" width="5" height="3" fill="#0d110e"/>
+                    <rect x="14" y="3" width="5" height="3" fill="#0d110e"/>
+                  </svg>
+                </span>
+                <span class="ability-copy">
+                  <strong>磁力场</strong>
+                  <small>吸弹 · 牵引</small>
+                </span>
+                <span class="ability-timer" data-skill-timer>READY</span>
+              </button>
+
+              <button class="ability-btn" data-player="1" data-skill="mind" type="button" title="心念支配：选择一名敌军，把它变成自主作战的友军">
+                <span class="ability-key">8</span>
+                <span class="ability-art" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M9 3a6 6 0 0 0-4 10.5V19h4v-3h3v3h4v-5.2A6 6 0 0 0 9 3Z" fill="currentColor"/>
+                    <path d="M17 6c1.6 1.1 2.5 2.9 2.5 4.8M19.5 3.5C22 5.2 23 8 23 10.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                  </svg>
+                </span>
+                <span class="ability-copy">
+                  <strong>心念支配</strong>
+                  <small>选目标 · 策反</small>
+                </span>
+                <span class="ability-timer" data-skill-timer>READY</span>
+              </button>
+
+              <button class="ability-btn" data-player="1" data-skill="teleport" type="button" title="瞬移：进入慢动作瞄准，选择落点后穿越障碍跃迁">
+                <span class="ability-key">9</span>
+                <span class="ability-art" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12 2 16 7 12 12 8 7 12 2Z" fill="currentColor"/>
+                    <path d="M12 12 16 17 12 22 8 17 12 12Z" fill="currentColor" opacity=".45"/>
+                  </svg>
+                </span>
+                <span class="ability-copy">
+                  <strong>瞬移</strong>
+                  <small>选落点 · 无敌</small>
+                </span>
+                <span class="ability-timer" data-skill-timer>READY</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="target-hint" id="target-hint" hidden>
+            <span class="target-hint-tag">AIMING</span>
+            <span id="target-hint-text"></span>
+          </div>
+
+          <div class="rail-note">
+            <span class="rail-label">FIELD NOTES</span>
+            <p>P1 技能 Q/E/F · P2 技能 7/8/9。</p>
+            <p>心念支配会策反一名敌军，它会自己找敌人开火。</p>
+            <p>瞬移可穿过砖墙、钢墙和河流，落点短暂无敌。</p>
+          </div>
+
+          <div class="rail-footnote right">
+            <span>瞄准：当前玩家方向键移动</span>
+            <span>SPACE / ENTER / 点击 确认</span>
+            <span>ESC / 当前技能卡 取消</span>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <div class="touch-controls" id="touch-controls" aria-label="触屏控制器">
+      <div class="dpad" aria-label="移动">
+        <button type="button" class="dpad-btn up" data-control="up" aria-label="向上">▲</button>
+        <button type="button" class="dpad-btn left" data-control="left" aria-label="向左">◀</button>
+        <span class="dpad-hub" aria-hidden="true"></span>
+        <button type="button" class="dpad-btn right" data-control="right" aria-label="向右">▶</button>
+        <button type="button" class="dpad-btn down" data-control="down" aria-label="向下">▼</button>
+      </div>
+      <button type="button" class="fire-btn" data-control="fire" aria-label="开火">
+        <span>FIRE</span>
+      </button>
+    </div>
+
+    <footer class="footer">
+      <span>TANK WARS / TRIBUTE BUILD</span>
+      <span class="footer-sep">■</span>
+      <span>WEB PLAYTEST · 3 STAGES</span>
+      <span class="footer-note">点击战场或按 ENTER 开始</span>
+    </footer>
+  </div>
+
+  <!-- The ending easter egg. Shown after the scripted final minute of stage 3. -->
+  <section class="ending-overlay" id="ending-overlay" role="dialog" aria-modal="true" hidden aria-hidden="true" aria-labelledby="ending-title">
+    <div class="ending-sky" aria-hidden="true"></div>
+    <div class="ending-petals" id="ending-petals" aria-hidden="true"></div>
+    <div class="ending-content">
+      <p class="ending-kicker">STAGE 04 · EPILOGUE</p>
+      <h2 class="ending-title" id="ending-title">谢谢你，<span>陪这只老鹰走完一生。</span></h2>
+      <p class="ending-sub">YOUTH · MIDLIFE · OLD AGE</p>
+
+      <div class="ending-chapters">
+        <article class="ending-chapter youth">
+          <span class="chapter-no">01</span>
+          <div class="chapter-icon" aria-hidden="true">
+            <svg viewBox="0 0 72 72" shape-rendering="crispEdges">
+              <g fill="#8c9b9a">
+                <rect x="16" y="14" width="40" height="4"/>
+                <rect x="16" y="18" width="4" height="38"/>
+                <rect x="52" y="18" width="4" height="38"/>
+                <rect x="20" y="56" width="32" height="4"/>
+              </g>
+              <g fill="#c9d4d1">
+                <rect x="18" y="15" width="36" height="1"/>
+                <rect x="17" y="19" width="1" height="35"/>
+                <rect x="54" y="19" width="1" height="35"/>
+              </g>
+              <rect x="20" y="20" width="32" height="32" fill="#17160f"/>
+              <rect x="22" y="22" width="28" height="28" fill="#6f5721"/>
+              <rect x="24" y="24" width="24" height="24" fill="#29271a"/>
+              <rect x="26" y="26" width="20" height="20" fill="#93702a"/>
+              <rect x="28" y="28" width="16" height="16" fill="#161a12"/>
+              <g fill="#d6a331">
+                <rect x="34" y="28" width="4" height="3"/>
+                <rect x="33" y="31" width="6" height="2"/>
+                <rect x="30" y="33" width="12" height="3"/>
+                <rect x="31" y="36" width="10" height="3"/>
+                <rect x="33" y="39" width="6" height="4"/>
+                <rect x="35" y="43" width="2" height="3"/>
+                <rect x="26" y="36" width="4" height="2"/>
+                <rect x="24" y="38" width="4" height="2"/>
+                <rect x="42" y="36" width="4" height="2"/>
+                <rect x="44" y="38" width="4" height="2"/>
+              </g>
+              <rect x="35" y="32" width="2" height="2" fill="#ffe17a"/>
+            </svg>
+          </div>
+          <p class="chapter-kicker">YOUTH / CRADLE</p>
+          <h3>初生</h3>
+          <p class="chapter-note">石头护着老鹰，放心去闯。</p>
+        </article>
+
+        <article class="ending-chapter midlife">
+          <span class="chapter-no">02</span>
+          <div class="chapter-icon" aria-hidden="true">
+            <svg viewBox="0 0 72 72" shape-rendering="crispEdges">
+              <g fill="#8a4434">
+                <rect x="16" y="14" width="40" height="4"/>
+                <rect x="16" y="18" width="4" height="38"/>
+                <rect x="52" y="18" width="4" height="38"/>
+                <rect x="20" y="56" width="32" height="4"/>
+              </g>
+              <g fill="#c06a4c">
+                <rect x="19" y="14" width="3" height="1"/>
+                <rect x="27" y="14" width="3" height="1"/>
+                <rect x="35" y="14" width="3" height="1"/>
+                <rect x="43" y="14" width="3" height="1"/>
+                <rect x="51" y="14" width="3" height="1"/>
+                <rect x="16" y="22" width="1" height="3"/>
+                <rect x="16" y="30" width="1" height="3"/>
+                <rect x="16" y="38" width="1" height="3"/>
+                <rect x="16" y="46" width="1" height="3"/>
+                <rect x="55" y="22" width="1" height="3"/>
+                <rect x="55" y="30" width="1" height="3"/>
+                <rect x="55" y="38" width="1" height="3"/>
+                <rect x="55" y="46" width="1" height="3"/>
+              </g>
+              <rect x="20" y="20" width="32" height="32" fill="#17160f"/>
+              <rect x="22" y="22" width="28" height="28" fill="#6f5721"/>
+              <rect x="24" y="24" width="24" height="24" fill="#29271a"/>
+              <rect x="26" y="26" width="20" height="20" fill="#93702a"/>
+              <rect x="28" y="28" width="16" height="16" fill="#161a12"/>
+              <g fill="#d6a331">
+                <rect x="34" y="28" width="4" height="3"/>
+                <rect x="33" y="31" width="6" height="2"/>
+                <rect x="30" y="33" width="12" height="3"/>
+                <rect x="31" y="36" width="10" height="3"/>
+                <rect x="33" y="39" width="6" height="4"/>
+                <rect x="35" y="43" width="2" height="3"/>
+                <rect x="26" y="36" width="4" height="2"/>
+                <rect x="24" y="38" width="4" height="2"/>
+                <rect x="42" y="36" width="4" height="2"/>
+                <rect x="44" y="38" width="4" height="2"/>
+              </g>
+              <rect x="35" y="32" width="2" height="2" fill="#ffe17a"/>
+            </svg>
+          </div>
+          <p class="chapter-kicker">MIDLIFE / HOMESTEAD</p>
+          <h3>中坚</h3>
+          <p class="chapter-note">只剩一层土墙，自己守住。</p>
+        </article>
+
+        <article class="ending-chapter oldage">
+          <span class="chapter-no">03</span>
+          <div class="chapter-icon" aria-hidden="true">
+            <svg viewBox="0 0 72 72" shape-rendering="crispEdges">
+              <g fill="#c9bfa2" opacity=".28">
+                <rect x="20" y="60" width="2" height="2"/>
+                <rect x="27" y="62" width="1" height="1"/>
+                <rect x="41" y="61" width="2" height="1"/>
+                <rect x="49" y="59" width="1" height="2"/>
+              </g>
+              <rect x="20" y="20" width="32" height="32" fill="#17160f"/>
+              <rect x="22" y="22" width="28" height="28" fill="#6f5721"/>
+              <rect x="24" y="24" width="24" height="24" fill="#29271a"/>
+              <rect x="26" y="26" width="20" height="20" fill="#93702a"/>
+              <rect x="28" y="28" width="16" height="16" fill="#161a12"/>
+              <g fill="#d6a331">
+                <rect x="34" y="28" width="4" height="3"/>
+                <rect x="33" y="31" width="6" height="2"/>
+                <rect x="30" y="33" width="12" height="3"/>
+                <rect x="31" y="36" width="10" height="3"/>
+                <rect x="33" y="39" width="6" height="4"/>
+                <rect x="35" y="43" width="2" height="3"/>
+                <rect x="26" y="36" width="4" height="2"/>
+                <rect x="24" y="38" width="4" height="2"/>
+                <rect x="42" y="36" width="4" height="2"/>
+                <rect x="44" y="38" width="4" height="2"/>
+              </g>
+              <rect x="35" y="32" width="2" height="2" fill="#ffe17a"/>
+            </svg>
+          </div>
+          <p class="chapter-kicker">OLD AGE / DUSK</p>
+          <h3>落幕</h3>
+          <p class="chapter-note">再无保护，任何一炮都能结束。</p>
+        </article>
+      </div>
+
+      <div class="ending-letter">
+        <span class="letter-mark" aria-hidden="true">“</span>
+        <p class="letter-body">
+          有一天，我们终会长大，<br>
+          变成一个<em>无聊且忙碌的大人</em>，<br>
+          慢慢老去，慢慢死去。<br>
+          但无论多忙，都要留一点点时间给自己，<br>
+          做自己喜欢的事情。
+        </p>
+        <p class="letter-after">哪怕只是，再打一局曾经的坦克大战。</p>
+      </div>
+
+      <div class="ending-actions">
+        <button class="ending-replay" id="ending-replay" type="button">再玩一次 <kbd>ENTER</kbd></button>
+        <span class="ending-hint">三关通关 · 感谢你把时间花在这里</span>
+      </div>
+
+      <p class="ending-foot">TAKE YOUR TIME · THE WAR CAN WAIT</p>
+    </div>
+  </section>
+
+  <script src="game.js"></script>
+</body>
+</html>

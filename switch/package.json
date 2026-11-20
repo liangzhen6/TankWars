@@ -1,0 +1,24 @@
+{
+  "name": "tank-wars",
+  "version": "0.2.5",
+  "private": true,
+  "type": "module",
+  "description": "TANK WARS Nintendo Switch homebrew test build",
+  "author": {
+    "name": "Tank Wars Tribute"
+  },
+  "scripts": {
+    "build": "esbuild --bundle --sourcemap --sources-content=false --target=es2022 --format=esm --outdir=romfs src/main.js",
+    "nro": "nxjs-nro --fat"
+  },
+  "devDependencies": {
+    "@nx.js/constants": "0.4.1",
+    "@nx.js/nro": "1.0.0-beta.7",
+    "@nx.js/runtime": "1.0.0-beta.7",
+    "esbuild": "^0.27.3"
+  },
+  "nacp": {
+    "id": "01a7b2c3d4e50000",
+    "title": "TANK WARS"
+  }
+}
