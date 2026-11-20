@@ -1,0 +1,88 @@
+name: Build & Release Switch NRO
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (must start with v, e.g. v0.2.5)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: switch-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: switch/package-lock.json
+
+      - name: Resolve release tag
+        id: tag
+        env:
+          EVENT: ${{ github.event_name }}
+          INPUT_TAG: ${{ inputs.tag }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            TAG="$INPUT_TAG"
+          else
+            TAG="$REF_NAME"
+          fi
+          case "$TAG" in
+            v*) ;;
+            *) echo "Release tag must start with 'v' (got '$TAG')" >&2; exit 1 ;;
+          esac
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Verify package version matches tag
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          PKG_VERSION="$(node -p "require('./switch/package.json').version")"
+          if [ "v$PKG_VERSION" != "$TAG" ]; then
+            echo "Tag $TAG does not match switch/package.json version $PKG_VERSION" >&2
+            exit 1
+          fi
+
+      - name: Build NRO
+        run: ./switch/build.sh
+
+      - name: Check artifact
+        run: |
+          test -s switch/tank-wars.nro
+          ls -lh switch/tank-wars.nro
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: TANK WARS ${{ steps.tag.outputs.tag }}
+          files: switch/tank-wars.nro
+          fail_on_unmatched_files: true
+          generate_release_notes: true
+          body: |
+            Nintendo Switch 测试包（NX.js fat NRO，runtime 已内嵌）。
+
+            **安装**
+            1. 把 `tank-wars.nro` 复制到 SD 卡 `/switch/tank-wars.nro`。
+            2. 在大气层 hbmenu 中启动 **TANK WARS**。
+            3. 必须从**应用模式**启动（主页按住 `R` 再按 `A` 打开 hbmenu）；相册 applet 模式下 720p 画面会 OOM。
+
+            详见 [README](https://github.com/${{ github.repository }}/blob/main/README.md#switch-测试包)。

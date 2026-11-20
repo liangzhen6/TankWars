@@ -131,7 +131,9 @@ index.html?ending=1                  直接预览结局彩蛋
 
 ## Switch 测试包
 
-已生成自包含的 fat NRO：
+直接下载：[最新 Release](https://github.com/liangzhen6/TankWars/releases/latest)。推送 `v*` 标签（或手动触发 **Build & Release Switch NRO** workflow）时，GitHub Actions 会自动重新构建并把 `tank-wars.nro` 作为 release asset 上传。NRO 体积约 54 MB，属于构建产物，因此不进入 git 仓库。
+
+本地构建会生成自包含的 fat NRO：
 
 ```text
 switch/tank-wars.nro   （约 54 MB，NX.js 1.0.0-beta.7 runtime 已内嵌）

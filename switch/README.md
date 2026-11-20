@@ -13,11 +13,11 @@ cd switch
 ./build.sh
 ```
 
-产物：`switch/tank-wars.nro`。
+产物：`switch/tank-wars.nro`（不进入 git；发布包见 [Releases](https://github.com/liangzhen6/TankWars/releases/latest)，推送 `v*` 标签会由 Actions 自动构建上传）。
 
 构建不需要 devkitPro；`@nx.js/nro` 已经包含打包所需的 nx.js runtime。脚本会把源码镜像到 `/tmp` 再构建，以避开部分 macOS 环境里 esbuild 扫描桌面目录卡住的问题。
 
-当前版本：**0.2.2**。
+当前版本：**0.2.5**。
 
 ## 安装到 Switch
 
